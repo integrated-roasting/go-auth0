@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/go-errors/errors"
+	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	jose "gopkg.in/square/go-jose.v2"
 )
