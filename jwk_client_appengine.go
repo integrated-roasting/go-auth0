@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/go-errors/errors"
+	"google.golang.org/appengine/log"
 	jose "gopkg.in/square/go-jose.v2"
 )
 
@@ -38,12 +39,14 @@ func NewJWKClient(options JWKClientOptions) *JWKClient {
 }
 
 func (j *JWKClient) GetKey(req *http.Request, ID string) (jose.JSONWebKey, bool) {
+	ctx := appengine.NewContext(req)
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
 	key, exist := j.keys[ID]
 
 	if !exist {
+		log.Debugf(ctx, "[GetKey] Key %s does not exist; going to download it.", ID)
 		j.downloadKeys(req)
 	}
 
@@ -53,7 +56,7 @@ func (j *JWKClient) GetKey(req *http.Request, ID string) (jose.JSONWebKey, bool)
 
 func (j *JWKClient) downloadKeys(req *http.Request) error {
 	//resp, err := http.Get(j.options.URI)
-	ctx := appengine.NewContext(r)
+	ctx := appengine.NewContext(req)
 	client := urlfetch.Client(ctx)
 	resp, err := client.Get(j.options.URI)
 
