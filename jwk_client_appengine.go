@@ -11,6 +11,7 @@ import (
 	"github.com/go-errors/errors"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/urlfetch"
 	jose "gopkg.in/square/go-jose.v2"
 )
 
