@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/go-errors/errors"
+	jose "gopkg.in/square/go-jose.v2"
 )
 
 var (
