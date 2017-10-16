@@ -1,4 +1,4 @@
-// +build !appegnine
+// +build appegnine
 
 package auth0
 
@@ -36,22 +36,25 @@ func NewJWKClient(options JWKClientOptions) *JWKClient {
 	return &JWKClient{keys: map[string]jose.JSONWebKey{}, options: options}
 }
 
-func (j *JWKClient) GetKey(ID string) (jose.JSONWebKey, bool) {
+func (j *JWKClient) GetKey(req *http.Request, ID string) (jose.JSONWebKey, bool) {
 	j.mu.Lock()
 	defer j.mu.Unlock()
 
 	key, exist := j.keys[ID]
 
 	if !exist {
-		j.downloadKeys()
+		j.downloadKeys(req)
 	}
 
 	key, exist = j.keys[ID]
 	return key, exist
 }
 
-func (j *JWKClient) downloadKeys() error {
-	resp, err := http.Get(j.options.URI)
+func (j *JWKClient) downloadKeys(req *http.Request) error {
+	//resp, err := http.Get(j.options.URI)
+	ctx := appengine.NewContext(r)
+	client := urlfetch.Client(ctx)
+	resp, err := client.Get(j.options.URI)
 
 	if err != nil {
 		return err
@@ -96,7 +99,7 @@ func (j *JWKClient) GetSecret(req *http.Request) (interface{}, error) {
 		return nil, ErrInvalidAlgorithm
 	}
 
-	webKey, exist := j.GetKey(header.KeyID)
+	webKey, exist := j.GetKey(req, header.KeyID)
 	if !exist {
 		return nil, ErrNoKeyFound
 	}
